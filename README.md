@@ -20,8 +20,6 @@ canvas. **No samples. No libraries. No build step.**
 > Start. It offers a reduced-flashing mode, which is on by default if your
 > system asks for reduced motion.
 
----
-
 ## Run it
 
 Open `index.html` in a current browser (Chrome, Edge, Firefox or Safari).
