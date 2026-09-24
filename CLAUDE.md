@@ -107,12 +107,18 @@ NODE_PATH=$(npm root -g) node tools/check.mjs both          # desktop + phone: c
 NODE_PATH=$(npm root -g) node tools/check.mjs reduced       # reduced-motion / reduced-flashing start
 NODE_PATH=$(npm root -g) node tools/render-audio.mjs        # offline render per section: levels, spectrograms
 NODE_PATH=$(npm root -g) node tools/render-audio.mjs full   # whole piece → WAV + MP3
+NODE_PATH=$(npm root -g) node tools/render-video.mjs 7      # whole piece → 1080p MP4 (~10 min)
+node tools/build-bundle.mjs out.html                        # single-file HTML (all CSS/JS inlined)
 ```
 Outputs go to `tools/out/` (git-ignored). Look at the screenshots and
 spectrograms before claiming something works. Headless Chromium renders the
 canvas in software, so the adaptive quality drops the resolution; use
 `index.html?hq=1` for sharp captures. When you add a theory caption, add a
 matching assertion to `tools/theory-check.mjs`.
+
+Phones: touch devices get `Engine({ lite: true })` (fewer oscillators per
+voice, shorter reverb). Keep new instruments lite-aware if they stack many
+oscillators per note.
 
 Section lengths are set by `bars`, `bpm`/`bpmAt` and `meter`/`meterAt` in each
 section file; `render-audio.mjs` prints every section's duration and the total.

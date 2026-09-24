@@ -133,7 +133,7 @@
         get bpm() { return self.bpm; },
         get meter() { return self.meter; },
         get cycle() { return self.cycle; },
-        get chord() { return self.chord; },
+        get currentChord() { return self.chord; },
         hz: T.hz,
         setTuning(t, tuning, extra) {
           self.tuning = tuning;

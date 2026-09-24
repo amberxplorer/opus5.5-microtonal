@@ -289,7 +289,7 @@
     amp.connect(p.dest || E.musicDuck);
     const panL = panNode(E, -0.6, f), panR = panNode(E, 0.6, f);
     const spread = p.spread != null ? p.spread : 14;
-    const voices = p.voices || 3;
+    const voices = E.lite ? Math.min(p.voices || 3, 3) : p.voices || 3;
     const end = t + dur + rel * 6;
     for (const hz of freqs) {
       for (let v = 0; v < voices; v++) {
@@ -382,7 +382,8 @@
       a.gain.exponentialRampToValueAtTime(peak * 0.001, t + dec);
       f.connect(a);
       a.connect(panNode(E, p.pan || 0, p.dest || E.musicDuck));
-      const types = p.wave ? ['custom', 'custom'] : ['sawtooth', 'square'];
+      let types = p.wave ? ['custom', 'custom'] : ['sawtooth', 'square'];
+      if (E.lite) types = types.slice(0, 1);
       types.forEach((ty, k) => {
         const o = c.createOscillator();
         if (ty === 'custom') o.setPeriodicWave(p.wave);
@@ -454,8 +455,9 @@
     f.connect(a);
     a.connect(p.dest || E.musicDuck);
     const panL = panNode(E, -0.7, f), panR = panNode(E, 0.7, f);
+    const layers = [[-9, panL, 'sawtooth'], [9, panR, 'sawtooth'], [0, f, 'triangle']];
     for (const hz of freqs) {
-      [[-9, panL, 'sawtooth'], [9, panR, 'sawtooth'], [0, f, 'triangle']].forEach(([dt, dst, ty]) => {
+      (E.lite ? layers.slice(0, 2) : layers).forEach(([dt, dst, ty]) => {
         const o = c.createOscillator();
         if (p.wave && ty === 'sawtooth') o.setPeriodicWave(p.wave);
         else o.type = ty;

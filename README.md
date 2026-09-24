@@ -34,8 +34,15 @@ down first; it is mastered loud, as hardstyle tends to be.
 | `H` | hide or show the theory text |
 
 URL options: `?section=4` starts at section IV, `?seed=1234` plays a fixed
-variation, `?reduced=1` starts in reduced-flashing mode, and `?hq=1` never
-lowers the render resolution (useful for screen captures).
+variation, `?reduced=1` starts in reduced-flashing mode, `?hq=1` never
+lowers the render resolution (useful for screen captures), and `?lite=1` /
+`?lite=0` forces the lighter synth voices on or off.
+
+**On phones:** the layout compacts to the essentials, the synths use fewer
+oscillators per voice on touch devices so the audio doesn't crackle, and
+the page asks to keep the screen awake. On iPhone it also asks to play
+through the silent switch, where Safari supports that; if you still hear
+nothing, check the switch.
 
 It runs for about 3:02. When it finishes it re-seeds its random choices
 (chord qualities, hooks, piano riffs, break chops) and plays a new variation.
@@ -144,7 +151,14 @@ node tools/theory-check.mjs                            # 47 assertions on the th
 NODE_PATH=$(npm root -g) node tools/check.mjs both     # load the page, visit all sections, screenshots, console errors
 NODE_PATH=$(npm root -g) node tools/render-audio.mjs   # offline render per section: levels, clipping, spectrograms
 NODE_PATH=$(npm root -g) node tools/render-audio.mjs full   # the whole piece as WAV + MP3
+NODE_PATH=$(npm root -g) node tools/render-video.mjs 7      # the whole piece as a 1080p MP4, frame by frame
+node tools/build-bundle.mjs out.html                        # everything inlined into one HTML file
 ```
+
+The video renderer never films the screen in real time. It renders the audio
+offline, then steps the real renderer on a virtual clock at exactly 30 fps. It
+feeds the waveform and spectrum rings from the rendered audio, and pipes the
+frames into ffmpeg, so the video is smooth on any machine.
 
 Outputs land in `tools/out/` (git-ignored).
 

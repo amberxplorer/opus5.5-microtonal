@@ -2,7 +2,7 @@
  * chord glyphs and theory captions flying out towards the viewer. */
 'use strict';
 (function (X) {
-  const U = X.U, TAU = U.TAU, S = X.Sprites, W = X.Wheel;
+  const U = X.U, TAU = U.TAU, W = X.Wheel;
   const SP = {};
 
   SP.background = function (V, g) {

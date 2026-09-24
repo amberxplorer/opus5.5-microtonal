@@ -5,7 +5,8 @@
  * URL options (for demos / debugging):
  *   ?section=4  start at section IV     ?seed=1234  fixed variation
  *   ?reduced=1  start in reduced-flashing mode
- *   ?hq=1       never lower the render resolution (for screen captures) */
+ *   ?hq=1       never lower the render resolution (for screen captures)
+ *   ?lite=1|0   force the lighter synth voices on or off (default: on for touch devices) */
 'use strict';
 (function (X) {
   const $ = (id) => document.getElementById(id);
@@ -35,10 +36,18 @@
       $('warnBody').insertAdjacentHTML('beforeend', '<p><strong>Sorry: this browser has no Web Audio support.</strong></p>');
       return;
     }
+    // iOS: play through the silent switch like a music app would.
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch { /* optional */ }
+    // Keep a phone screen awake for the three minutes (optional).
+    try {
+      if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {});
+    } catch { /* optional */ }
     ctx = new AC({ latencyHint: 'interactive' });
     const vol = Number($('startVol').value);
     $('vol').value = String(vol);
-    engine = new X.Engine(ctx, { volume: vol });
+    const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    const lite = params.has('lite') ? params.get('lite') === '1' : coarse;
+    engine = new X.Engine(ctx, { volume: vol, lite });
     hud = new X.Hud(document);
     hud.reduced = reduced;
     visuals = new X.Visuals($('stage'), hud, {
@@ -174,6 +183,12 @@
   });
 
   window.addEventListener('resize', () => { if (visuals) visuals.resize(); });
+  // A wake lock is dropped whenever the page is hidden; ask again on return.
+  document.addEventListener('visibilitychange', () => {
+    try {
+      if (!document.hidden && running && navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {});
+    } catch { /* optional */ }
+  });
 
   // Controls fade out when the pointer is idle.
   let idleTimer = 0;

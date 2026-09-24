@@ -12,6 +12,7 @@
       this.ctx = ctx;
       this.volume = opts.volume != null ? opts.volume : 0.8;
       this.muted = false;
+      this.lite = !!opts.lite; // fewer oscillators per voice, for phones
       this.bpm = 120;
       this._curves = new Map();
       this._build();
@@ -60,7 +61,7 @@
       // ------------------------------------------------------------ sends
       this.verbIn = this._gain(1);
       this.convolver = c.createConvolver();
-      this.convolver.buffer = this._makeIR(2.8, 2.4);
+      this.convolver.buffer = this.lite ? this._makeIR(1.8, 2.4) : this._makeIR(2.8, 2.4);
       this.verbIn.connect(this.convolver);
       this.verbOut = this._gain(0.32, this.pre);
       this.convolver.connect(this.verbOut);

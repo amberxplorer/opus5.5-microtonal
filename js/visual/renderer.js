@@ -38,6 +38,7 @@
       this.bassAng = -Math.PI / 2; this.bassTarget = 0; this.bassPulse = 0; this.bassHue = 200; this.bassSeen = false;
       this.lattice = { cx: 0, cy: 0, path: [], tri: null, drift: 0 };
       this.partialsActive = new Set();
+      this.titleAt = -10;
       this.riser = null; this.riserLevel = 0;
       this.starSpeed = 1;
       this.waveData = null; this.specData = null;
@@ -167,7 +168,12 @@
             this.rings.push({ z: 7.5, hue: this.chordHue, n: this.ringN, spin: Math.random() * TAU, accent: ev.group === 0 ? 1 : 0 });
           }
           break;
-        case 'text': if (!stale) this._text(ev.text, ev.style); break;
+        case 'text':
+          if (stale) break;
+          // let a section's title card clear before captions fly
+          if (this.t - this.titleAt < 1.1) this.push(Object.assign({}, ev, { t: this.titleAt + 1.1 + Math.random() * 0.3 }));
+          else this._text(ev.text, ev.style);
+          break;
         case 'stat': if (this.hud) this.hud.stat(ev.value); break;
         case 'fx':
           if (ev.kind === 'riser') this.riser = { start: ev.t, dur: ev.dur };
@@ -250,7 +256,7 @@
       // chord glyph flying toward the viewer
       if (this.flyers.length > 5) this.flyers.shift();
       this.flyers.push({
-        verts: orbs.map((o) => o.pos), hue: ch.hue, label: ch.label,
+        verts: orbs.map((o) => o.pos), hue: ch.hue, label: this.t - this.titleAt < 0.9 ? '' : ch.label,
         z: 1, age: 0, life: (this.reduced ? 2.2 : 1.3) / Math.max(0.5, this.motion),
         rot: 0, spin: (Math.random() - 0.5) * (this.reduced ? 0.3 : 1.2),
       });
@@ -354,6 +360,7 @@
 
     _titleCard(ev) {
       const m = ev.meta;
+      this.titleAt = this.t;
       const z0 = 2.6;
       this.texts.push({ text: `${U.roman(ev.index + 1)} · ${m.title}`, x: 0, y: -0.08, z0, z: z0,
         vz: -0.85 * this.motion * (this.reduced ? 0.6 : 1), yaw: 0, yawSpin: 0, size: this.narrow ? 1.4 : 2.1, hue: m.hue, alpha: 1, age: 0 });

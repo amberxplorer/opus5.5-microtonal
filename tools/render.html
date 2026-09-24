@@ -54,13 +54,13 @@
   }
 
   // Render sections [from, to) back to back (or one section) and measure.
-  window.render = async function (from, to, seed, withWav) {
+  window.render = async function (from, to, seed, withWav, lite) {
     const sr = 44100;
     let seconds = 0.3;
     for (let i = from; i < to; i++) seconds += sectionDuration(SECS[i]);
     seconds += 1.5;
     const ctx = new OfflineAudioContext(2, Math.ceil(sr * seconds), sr);
-    const E = new XEN.Engine(ctx, { volume: 1 });
+    const E = new XEN.Engine(ctx, { volume: 1, lite: !!lite });
     const counts = {};
     const errors = [];
     const cond = new XEN.Conductor(E, SECS, {
