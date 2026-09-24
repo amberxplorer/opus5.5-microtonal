@@ -27,6 +27,22 @@ const durs = await page.evaluate(() => window.durations());
 console.log('section durations:', durs.map((d) => `${d.id} ${d.seconds}s`).join(' | '),
   '| total', durs.reduce((s, d) => s + d.seconds, 0).toFixed(1) + 's');
 
+if (which === 'full') {
+  // The whole piece in one continuous render, plus an MP3 to listen to.
+  const res = await page.evaluate(([s]) => window.render(0, 8, s, true), [seed]);
+  writeFileSync(path.join(out, 'xenosphere-full.wav'), Buffer.from(res.wav, 'base64'));
+  execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-i', path.join(out, 'xenosphere-full.wav'),
+    '-codec:a', 'libmp3lame', '-b:a', '256k', path.join(out, 'xenosphere-full.mp3')]);
+  execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-i', path.join(out, 'xenosphere-full.wav'),
+    '-lavfi', 'showspectrumpic=s=1800x500:legend=1:scale=log:fscale=log', path.join(out, 'xenosphere-full-spec.png')]);
+  delete res.wav;
+  console.log(`[full] ${res.seconds}s peak ${res.peak} rms ${res.rmsDb} dB nan ${res.nan} hot ${res.hot}`);
+  console.log('  events:', JSON.stringify(res.counts));
+  if (res.errors.length) console.log('  ERRORS:\n   ' + res.errors.join('\n   '));
+  if (logs.length) console.log('\nconsole:\n ' + logs.join('\n '));
+  await browser.close();
+  process.exit(res.errors.length ? 1 : 0);
+}
 const list = which === 'all' ? durs.map((_, i) => i) : [Number(which)];
 for (const i of list) {
   const res = await page.evaluate(([a, s]) => window.render(a, a + 1, s, true), [i, seed]);

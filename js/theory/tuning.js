@@ -125,7 +125,14 @@
     const base = NAMES12[U.mod(semis, 12)];
     return Math.abs(dev) < 0.5 ? base : base + U.signed(dev, 0) + '¢';
   }
-  Object.assign(T, { pythagoreanName, upDownNames, jiName, centsName, arrows, accidental,
+  // How many letter names a just ratio spans (5/4 → 2: a third; 7/4 → 6:
+  // a seventh), using the same fifth-mapping as the HEJI names above.
+  function letterSteps(r) {
+    const m = monzo(r);
+    const k = m[1] + 4 * m[2] - 2 * m[3] - m[4] - 4 * m[5];
+    return U.mod(4 * k, 7);
+  }
+  Object.assign(T, { pythagoreanName, upDownNames, jiName, centsName, arrows, accidental, letterSteps,
     SHARP, FLAT, UP, DOWN, NAMES12 });
 
   // Bohlen–Pierce nine-note Lambda-mode naturals plus chromatic steps.
@@ -168,7 +175,9 @@
       this.subtitle = opts.subtitle || (this.isEdo ? EDO_SUBTITLES[n] : '') || '';
       this.names = opts.names || (this.isEdo ? upDownNames(n, opts.preferFlats) : BP_NAMES);
       this.refRatios = opts.refRatios ||
-        (this.isEdo ? ['3/2', '5/4', '7/4', '11/8', '13/8', '6/5', '7/6', '9/8'] : ['5/3', '7/3', '7/5', '9/7', '9/5', '11/9']);
+        (this.isEdo ? ['3/2', '5/4', '7/4', '11/8', '13/8', '6/5', '7/6', '9/8'] : ['5/3', '7/3', '7/5', '9/7', '9/5', '15/7']);
+      this.fifthSteps = Math.round(n * Math.log2(1.5));
+      this.sharpSteps = 7 * this.fifthSteps - 4 * n;
       this.valPrimes = this.isEdo ? [0, 1, 2, 3, 4, 5] : [1, 2, 3, 4, 5];
     }
     mapRatio(r) {
@@ -179,6 +188,26 @@
     nameOf(steps) {
       const i = U.mod(Math.round(steps), this.n);
       return this.names[i] || String(i);
+    }
+    // Spell a pitch on a given letter (chord spelling): the fewest
+    // sharps/flats and arrows that reach `steps` from that natural.
+    spell(steps, letter) {
+      if (!this.isEdo) return this.nameOf(steps);
+      const n = this.n, sharp = this.sharpSteps;
+      const nat = U.mod((FIFTHS.indexOf(letter) - 1) * this.fifthSteps, n);
+      const s = U.mod(Math.round(steps), n);
+      // When the sharp is a single step (12-, 19-EDO…) arrows are redundant.
+      const maxU = Math.abs(sharp) === 1 ? 0 : 4;
+      let best = null, bestScore = Infinity;
+      for (let a = -3; a <= 3; a++) {
+        if (a !== 0 && sharp === 0) continue;
+        let u = U.mod(s - nat - a * sharp, n);
+        if (u > n / 2) u -= n;
+        if (Math.abs(u) > maxU) continue;
+        const score = Math.abs(a) + Math.abs(u) * 1.25 + [0, 0, 0.6, 1.5][Math.abs(a)];
+        if (score < bestScore) { bestScore = score; best = arrows(u) + letter + accidental(a); }
+      }
+      return best || this.nameOf(steps);
     }
     posOfCents(c) { return U.mod(c, this.periodCents) / this.periodCents; }
     approx(r) {

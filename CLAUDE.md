@@ -1,11 +1,16 @@
 # Microtonal Music Demo — "XENOSPHERE"
 
 ## Goal
-A single-page website that performs a long (~5–6 minute, then endlessly
-re-seeded) piece of generative, microtonal electronic music written entirely in
-JavaScript. It should sound extreme, dense and exciting, and the visuals should
-be driven by the music. Every section lives in a different tuning system, and
+A single-page website that performs a ~3 minute piece of generative,
+microtonal electronic music written entirely in JavaScript, then re-seeds and
+plays a new variation. The vibe is **hardstyle and happy hardcore**: tuned
+distorted kicks, reverse bass, supersaws, hoovers, rave piano, build-ups and
+drops. It should sound extreme, dense and exciting, and the visuals should be
+driven by the music. Every section lives in a different tuning system, and
 the screen explains the theory as it happens ("theory-porn").
+
+Optimise for desktop, but the page must stay usable and legible on phones
+(portrait and landscape).
 
 ## Inspiration (not a template)
 Twitter user @dadabots posted a video
@@ -97,8 +102,17 @@ Pitches inside sections are **cents relative to C4 (261.626 Hz)**.
 ## Testing
 Playwright and Chromium are installed globally in the cloud environment:
 ```
-NODE_PATH=$(npm root -g) node tools/check.mjs          # console errors + screenshots
-NODE_PATH=$(npm root -g) node tools/render-audio.mjs   # offline render, levels, spectrograms
+node tools/theory-check.mjs                                 # assertions on on-screen theory facts
+NODE_PATH=$(npm root -g) node tools/check.mjs both          # desktop + phone: console errors, screenshots
+NODE_PATH=$(npm root -g) node tools/check.mjs reduced       # reduced-motion / reduced-flashing start
+NODE_PATH=$(npm root -g) node tools/render-audio.mjs        # offline render per section: levels, spectrograms
+NODE_PATH=$(npm root -g) node tools/render-audio.mjs full   # whole piece → WAV + MP3
 ```
 Outputs go to `tools/out/` (git-ignored). Look at the screenshots and
-spectrograms before claiming something works.
+spectrograms before claiming something works. Headless Chromium renders the
+canvas in software, so the adaptive quality drops the resolution; use
+`index.html?hq=1` for sharp captures. When you add a theory caption, add a
+matching assertion to `tools/theory-check.mjs`.
+
+Section lengths are set by `bars`, `bpm`/`bpmAt` and `meter`/`meterAt` in each
+section file; `render-audio.mjs` prints every section's duration and the total.

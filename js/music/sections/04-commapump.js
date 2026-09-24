@@ -86,6 +86,7 @@
         api.setTuning(t, tu);
       }
       api.chord(t, ch);
+      api.event(t, 'drift', { cents: spec.drift });
       st.chord = ch;
       const cents = ch.notes.map((n) => n.cents);
       st.voicing = K.voiceLead(st.voicing, cents, 1200, -500, 1000, 4);

@@ -52,9 +52,11 @@
       }
     }
     if (!best) return null;
-    const fLo = T.hz(notes[best.i].cents), fHi = T.hz(notes[best.j].cents);
+    // Beat rate quoted with the lower note in the C4–C5 octave.
     const target = 1200 * Math.log2(best.n / best.d);
     const actual = notes[best.j].cents - notes[best.i].cents;
+    const lo = U.mod(notes[best.i].cents, 1200);
+    const fLo = T.hz(lo), fHi = T.hz(lo + actual);
     return {
       n: best.n, d: best.d, lo: best.i, hi: best.j,
       fLo, fHi, error: actual - target,
@@ -88,10 +90,14 @@
     let notes, relStr, relSuffix, errors = null;
     if (tuning.kind === 'ed') {
       const rel = q.ratios.map((r) => tuning.mapRatio(r));
-      notes = rel.map((s) => ({
+      const rootName = tuning.nameOf(root);
+      const rootLetter = (rootName.match(/[A-G]/) || ['C'])[0];
+      const L = 'CDEFGAB';
+      notes = rel.map((s, i) => ({
         steps: root + s,
         cents: (root + s) * tuning.stepCents + shift,
-        name: tuning.nameOf(root + s),
+        name: i === 0 || !tuning.isEdo ? tuning.nameOf(root + s)
+          : tuning.spell(root + s, L[(L.indexOf(rootLetter) + T.letterSteps(q.ratios[i])) % 7]),
       }));
       relStr = rel.join(' · ');
       relSuffix = '\\' + tuning.n + (tuning.isEdo ? '' : 'ed' + tuning.period);
