@@ -64,7 +64,8 @@
       this._set(e.chordRatio, ch.chordStr ? ch.chordStr.split(':').join(' : ') : '');
       const rel = ch.relStr ? (ch.tuning.kind === 'ed' ? `steps ${ch.relStr} ${ch.relSuffix}` : ch.relStr) : '';
       this._set(e.chordRel, rel);
-      let cents = `cents ${ch.centsStr}`;
+      const parts = ch.centsStr.split(' \u00b7 ');
+      let cents = `cents ${parts.length > 8 ? parts.slice(0, 7).join(' \u00b7 ') + ' \u2026' : ch.centsStr}`;
       if (ch.errors && ch.errors.length) cents += `  ·  err ${ch.errors.map((x) => U.signed(x.error, 1)).join(' ')}`;
       this._set(e.chordCents, cents);
       this._set(e.chordFn, ch.fn || '');
