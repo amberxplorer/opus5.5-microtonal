@@ -1,6 +1,11 @@
 # XENOSPHERE
 ### eight tunings, one thread
 
+## [▶ Play the live demo](https://amberxplorer.github.io/opus5.5-microtonal/)
+
+Runs in any modern browser, best on a desktop with headphones or speakers.
+It opens with a photosensitivity warning and nothing plays until you press Start.
+
 A three-minute piece of generative **microtonal hardstyle and happy hardcore**,
 written entirely in JavaScript. Every section plays in a different tuning
 system, and the screen shows the theory as it happens: the chord, the ratios it
