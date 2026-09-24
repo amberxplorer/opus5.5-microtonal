@@ -1,5 +1,4 @@
-# XENOSPHERE
-### eight tunings, one thread
+# XENOSPHERE — eight tunings, one thread
 
 ## [▶ Play the live demo](https://amberxplorer.github.io/opus5.5-microtonal/)
 
